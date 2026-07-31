@@ -34,13 +34,13 @@ then triggers
 
 `builder.Dockerfile` bakes the pipeline's build-step dependencies
 (Go + git/make/zip/curl) into
-`git.teletype.hu/internal/ebitengine-builder`, so the build step
+`git.teletypegames.org/internal/ebitengine-builder`, so the build step
 no longer runs `apk add` on every run:
 
 ```sh
 docker build --platform linux/amd64 -f builder.Dockerfile \
-  -t git.teletype.hu/internal/ebitengine-builder:latest .
-docker push git.teletype.hu/internal/ebitengine-builder:latest
+  -t git.teletypegames.org/internal/ebitengine-builder:latest .
+docker push git.teletypegames.org/internal/ebitengine-builder:latest
 ```
 
 Detailed documentation lives on the wiki: `/development/ebitengine`.

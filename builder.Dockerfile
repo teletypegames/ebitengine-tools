@@ -4,8 +4,8 @@
 #
 # Build & push (the CI runner is linux/amd64):
 #   docker build --platform linux/amd64 -f builder.Dockerfile \
-#     -t git.teletype.hu/internal/ebitengine-builder:latest .
-#   docker push git.teletype.hu/internal/ebitengine-builder:latest
+#     -t git.teletypegames.org/internal/ebitengine-builder:latest .
+#   docker push git.teletypegames.org/internal/ebitengine-builder:latest
 
 # 1.26 covers every current game repo's go.mod directive (1.25.x, 1.26.x).
 FROM golang:1.26-alpine

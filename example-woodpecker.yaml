@@ -6,7 +6,7 @@ steps:
       - make ci-version
 
   - name: build
-    image: git.teletype.hu/internal/ebitengine-builder:latest
+    image: git.teletypegames.org/internal/ebitengine-builder:latest
     commands:
       - make ci-export
 
