@@ -37,26 +37,8 @@ them to the release as assets (see `teletypegames/NOTES_BINARY_PLAN.md`).
 Binary zip layout: a single root folder
 (`$(PROJECT)-$(VERSION)-<target>/`) containing the executable (plus
 LICENSE/README.md when present). The zips are created with unix `zip`,
-so the executable bit survives on the linux binary.
-
-## mac targets (mac-x64, mac-arm64)
-
-Ebitengine requires cgo on darwin (GLFW/Metal — purego does not cover
-it), so the mac targets cannot be cross-compiled from the linux builder.
-They are built **on a mac host** instead, packaged as a minimal
-`.app` bundle (generated Info.plist, ad-hoc `codesign`):
-
-```sh
-make mac-release VERSION=x.y.z \
-  DROPAREA_SSH_PASSWORD=... UPDATE_SECRET=...
-```
-
-This builds both mac zips, uploads them to the droparea and re-triggers
-`/update` — the updater attaches the new assets to the already existing
-release, so run it after the CI pipeline has created the release.
-Ad-hoc signature means Gatekeeper shows the "unidentified developer"
-warning (right-click → Open); proper signing/notarization needs an
-Apple Developer account.
+so the executable bit survives on the linux binary. mac targets need a
+mac runner (or osxcross) and are not part of the pipeline yet.
 
 ## Builder image
 
