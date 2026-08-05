@@ -10,8 +10,8 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
   `ci-binaries`, `ci-upload`, `ci-update`).
 - `example-woodpecker.yaml` — Woodpecker pipeline: version → export
   (Go, `GOOS=js GOARCH=wasm`) → binaries (native desktop zips) →
-  upload (scp to the droparea) → update (calls the teletypegames
-  `/update` endpoint with `platform=ebitengine`).
+  upload (HTTP POST to `/build/upload`) → update (calls the teletypegames
+  `/build/publish` endpoint with `platform=ebitengine`).
 - `example-tasks.json` — VS Code `.vscode/tasks.json` with the common
   dev tasks: **Run** (`go run .`, default build task, `Cmd+Shift+B`),
   **Build & Run**, **Build WASM** and **Make build**.
@@ -23,14 +23,14 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
 1. Copy `example-makefile.make` to `Makefile` and set `PROJECT`
    (the native binary is built to `bin/$(PROJECT)`).
 2. Copy `example-woodpecker.yaml` to `.woodpecker.yaml` and add the
-   `droparea_ssh_password` / `update_secret_key` secrets in Woodpecker.
+   `update_secret_key` secret in Woodpecker.
 3. Copy `example-tasks.json` to `.vscode/tasks.json` and replace the
    binary name (`ebitenginedemo`) with `$(PROJECT)`.
 
 The pipeline uploads `$(PROJECT)-$(VERSION).html.zip` plus the native
 binary zips (`$(PROJECT)-$(VERSION)-<target>.zip`, currently `win-x86`,
-`win-x64`, `linux-x64`) to the droparea, then triggers
-`/update?platform=ebitengine&name=$(PROJECT)&version=$(VERSION)`.
+`win-x64`, `linux-x64`) via `/build/upload`, then triggers
+`/build/publish?platform=ebitengine&name=$(PROJECT)&version=$(VERSION)`.
 The updater picks up the binary zips by naming convention and attaches
 them to the release as assets (see `teletypegames/NOTES_BINARY_PLAN.md`).
 
@@ -47,12 +47,11 @@ They are built **on a mac host** instead, packaged as a minimal
 `.app` bundle (generated Info.plist, ad-hoc `codesign`):
 
 ```sh
-make mac-release VERSION=x.y.z \
-  DROPAREA_SSH_PASSWORD=... UPDATE_SECRET=...
+make mac-release VERSION=x.y.z UPDATE_SECRET=...
 ```
 
-This builds both mac zips, uploads them to the droparea and re-triggers
-`/update` — the updater attaches the new assets to the already existing
+This builds both mac zips, uploads them via `/build/upload` and re-triggers
+`/build/publish` — the updater attaches the new assets to the already existing
 release, so run it after the CI pipeline has created the release.
 Ad-hoc signature means Gatekeeper shows the "unidentified developer"
 warning (right-click → Open); proper signing/notarization needs an
