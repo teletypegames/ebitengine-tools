@@ -7,10 +7,10 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
   (`build`, `wasm`, `export`, `watch`, `clean`), native binary targets
   (`binaries`, `binary-win-x86`, `binary-win-x64`, `binary-linux-x64`)
   plus the Woodpecker pipeline targets (`ci-version`, `ci-export`,
-  `ci-binaries`, `ci-upload`, `ci-update`).
+  `ci-binaries`, `ci-upload`, `ci-publish`).
 - `example-woodpecker.yaml` — Woodpecker pipeline: version → export
   (Go, `GOOS=js GOARCH=wasm`) → binaries (native desktop zips) →
-  upload (HTTP POST to `/build/upload`) → update (calls the teletypegames
+  upload (HTTP POST to `/build/upload`) → publish (calls the teletypegames
   `/build/publish` endpoint with `platform=ebitengine`).
 - `example-tasks.json` — VS Code `.vscode/tasks.json` with the common
   dev tasks: **Run** (`go run .`, default build task, `Cmd+Shift+B`),
