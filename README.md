@@ -6,12 +6,11 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
 - `example-makefile.make` — project Makefile: local dev targets
   (`build`, `wasm`, `export`, `watch`, `clean`), native binary targets
   (`binaries`, `binary-win-x86`, `binary-win-x64`, `binary-linux-x64`)
-  plus the Woodpecker pipeline targets (`ci-version`, `ci-export`,
-  `ci-binaries`, `ci-upload`, `ci-publish`).
-- `example-woodpecker.yaml` — Woodpecker pipeline: version → export
-  (Go, `GOOS=js GOARCH=wasm`) → binaries (native desktop zips) →
-  upload (HTTP POST to `/build/upload`) → publish (calls the teletypegames
-  `/build/publish` endpoint with `platform=ebitengine`).
+  and the mac-host release targets (`binaries-mac`, `mac-release`).
+- `example-woodpecker.yaml` — a one-line marker (`platform: ebitengine`): the
+  full pipeline (version → build → binaries → artifact → publish) is served by the update server's Woodpecker
+  configuration extension — preview it with
+  `curl "https://teletypegames.org/build/config?platform=ebitengine"`.
 - `example-tasks.json` — VS Code `.vscode/tasks.json` with the common
   dev tasks: **Run** (`go run .`, default build task, `Cmd+Shift+B`),
   **Build & Run**, **Build WASM** and **Make build**.
@@ -22,12 +21,15 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
 
 1. Copy `example-makefile.make` to `Makefile` and set `PROJECT`
    (the native binary is built to `bin/$(PROJECT)`).
-2. Copy `example-woodpecker.yaml` to `.woodpecker.yaml` and add the
-   `update_secret_key` secret in Woodpecker.
+2. Copy `example-woodpecker.yaml` to `.woodpecker.yaml` (a one-line marker — the
+   pipeline itself is served by the update server; add `name:` when the
+   software name differs from the repo name) and add the
+   `application_token` secret in Woodpecker (an ApplicationToken with
+   the `update` + `upload` scopes, created in the admin).
 3. Copy `example-tasks.json` to `.vscode/tasks.json` and replace the
    binary name (`ebitenginedemo`) with `$(PROJECT)`.
 
-The pipeline uploads `$(PROJECT)-$(VERSION).html.zip` plus the native
+The served pipeline uploads `$(PROJECT)-$(VERSION).html.zip` plus the native
 binary zips (`$(PROJECT)-$(VERSION)-<target>.zip`, currently `win-x86`,
 `win-x64`, `linux-x64`) via `/build/upload`, then triggers
 `/build/publish?platform=ebitengine&name=$(PROJECT)&version=$(VERSION)`.
