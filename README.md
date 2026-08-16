@@ -64,13 +64,13 @@ Apple Developer account.
 `builder.Dockerfile` bakes the pipeline's build-step dependencies
 (Go + git/make/zip/curl/jq and the X11/GL/ALSA dev libraries needed by
 the cgo `linux-x64` build) into
-`git.teletypegames.org/internal/ebitengine-builder`. Debian-based so
+`git.teletypegames.org/build/ebitengine-builder`. Debian-based so
 the linux binary links against glibc:
 
 ```sh
 docker build --platform linux/amd64 -f builder.Dockerfile \
-  -t git.teletypegames.org/internal/ebitengine-builder:latest .
-docker push git.teletypegames.org/internal/ebitengine-builder:latest
+  -t git.teletypegames.org/build/ebitengine-builder:latest .
+docker push git.teletypegames.org/build/ebitengine-builder:latest
 ```
 
 Detailed documentation lives on the wiki: `/development/ebitengine`.
