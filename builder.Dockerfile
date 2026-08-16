@@ -24,6 +24,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libasound2-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Our own Go modules (engines/inkwell, engines/gorpg) are served by the forge,
+# not by proxy.golang.org, and are absent from the public checksum database.
+ENV GOPRIVATE=git.teletypegames.org
+
 WORKDIR /workspace
 
 CMD ["/bin/bash"]
