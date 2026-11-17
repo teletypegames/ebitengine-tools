@@ -4,7 +4,7 @@ CI/CD templates for [Ebitengine](https://ebitengine.org) (Go) game
 projects, in the same spirit as [tic80-tools](../tic80-tools).
 
 - `example-makefile.make` — project Makefile: local dev targets
-  (`build`, `wasm`, `export`, `watch`, `clean`), native binary targets
+  (`build`, `run`, `wasm`, `export`, `watch`, `clean`), native binary targets
   (`binaries`, `binary-win-x86`, `binary-win-x64`, `binary-linux-x64`)
   and the mac-host release targets (`binaries-mac`, `mac-release`).
 - `example-woodpecker.yaml` — a one-line marker (`platform: ebitengine`): the
@@ -13,7 +13,15 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
   `curl "https://teletypegames.org/build/config?platform=ebitengine"`.
 - `example-tasks.json` — VS Code `.vscode/tasks.json` with the common
   dev tasks: **Run** (`go run .`, default build task, `Cmd+Shift+B`),
-  **Build & Run**, **Build WASM** and **Make build**.
+  **Build & Run** (`make run`), **Build WASM** and **Make build**.
+- `hello/` — the smallest Ebitengine game: a window that prints
+  "Hello World" (`main.go`, `go.mod`, `go.sum`, `.gitignore`). The Go
+  module is called `game`, so it builds under any project name.
+- `warp-template.json` — what *WarpEngine: New Game* (WarpEngine
+  Toolbox) copies for "Start from the template only": the Makefile,
+  the VS Code tasks and the `hello/` sources at the project root. The
+  toolbox sets `PROJECT` and writes `.woodpecker.yaml` and
+  `metadata.json` itself.
 - `web/index.html` — the HTML shell downloaded by `make export` and
   packaged next to the `.wasm` build.
 
@@ -26,8 +34,7 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
    software name differs from the repo name) and add the
    `application_token` secret in Woodpecker (an ApplicationToken with
    the `update` + `upload` scopes, created in the admin).
-3. Copy `example-tasks.json` to `.vscode/tasks.json` and replace the
-   binary name (`ebitenginedemo`) with `$(PROJECT)`.
+3. Copy `example-tasks.json` to `.vscode/tasks.json`.
 
 The served pipeline uploads `$(PROJECT)-$(VERSION).html.zip` plus the native
 binary zips (`$(PROJECT)-$(VERSION)-<target>.zip`, currently `win-x86`,

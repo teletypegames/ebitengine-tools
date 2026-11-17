@@ -27,6 +27,9 @@ build:
 	@mkdir -p $(BIN_DIR)
 	go build -o $(OUTPUT_BIN) .
 
+run: build
+	./$(OUTPUT_BIN)
+
 wasm:
 	@mkdir -p $(DIST_DIR)
 	GOOS=js GOARCH=wasm go build -o $(OUTPUT_WASM) .
@@ -152,4 +155,4 @@ watch:
 clean:
 	rm -rf $(BIN_DIR) $(DIST_DIR)
 
-.PHONY: all build wasm export watch clean binaries binaries-mac mac-release binary-win-x86 binary-win-x64 binary-linux-x64 binary-mac-x64 binary-mac-arm64 binary-build binary-build-mac
+.PHONY: all build run wasm export watch clean binaries binaries-mac mac-release binary-win-x86 binary-win-x64 binary-linux-x64 binary-mac-x64 binary-mac-arm64 binary-build binary-build-mac

@@ -1,0 +1,10 @@
+{
+  "files": {
+    "example-makefile.make": "Makefile",
+    "example-tasks.json": ".vscode/tasks.json",
+    "hello/main.go": "main.go",
+    "hello/go.mod": "go.mod",
+    "hello/go.sum": "go.sum",
+    "hello/.gitignore": ".gitignore"
+  }
+}
