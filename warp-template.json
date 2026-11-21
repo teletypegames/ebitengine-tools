@@ -6,5 +6,16 @@
     "hello/go.mod": "go.mod",
     "hello/go.sum": "go.sum",
     "hello/.gitignore": ".gitignore"
+  },
+  "devcontainer": {
+    "files": {
+      "example-devcontainer.json": ".devcontainer/devcontainer.json",
+      "example-devcontainer.Dockerfile": ".devcontainer/Dockerfile"
+    },
+    "fill": [
+      "example-devcontainer.json",
+      "example-devcontainer.Dockerfile"
+    ],
+    "tasks": "example-devcontainer-tasks.json"
   }
 }

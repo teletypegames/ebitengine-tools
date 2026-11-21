@@ -11,9 +11,9 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
   full pipeline (version → build → binaries → artifact → publish) is served by the update server's Woodpecker
   configuration extension — preview it with
   `curl "https://teletypegames.org/build/config?platform=ebitengine"`.
-- `example-tasks.json` — VS Code `.vscode/tasks.json` with the common
-  dev tasks: **Run** (`go run .`, default build task, `Cmd+Shift+B`),
-  **Build & Run** (`make run`), **Build WASM** and **Make build**.
+- `example-tasks.json` — VS Code `.vscode/tasks.json`: `build` (the default
+  build task) and `web` as `warpengine` tasks, and `run (native)` (`make run`
+  on this computer, with a local Go).
 - `hello/` — the smallest Ebitengine game: a window that prints
   "Hello World" (`main.go`, `go.mod`, `go.sum`, `.gitignore`). The Go
   module is called `game`, so it builds under any project name.
@@ -22,8 +22,21 @@ projects, in the same spirit as [tic80-tools](../tic80-tools).
   the VS Code tasks and the `hello/` sources at the project root. The
   toolbox sets `PROJECT` and writes `.woodpecker.yaml` and
   `metadata.json` itself.
-- `web/index.html` — the HTML shell downloaded by `make export` and
+- `web/index.html` — the HTML shell downloaded by `make web` / `make export` and
   packaged next to the `.wasm` build.
+
+## Dev container
+
+`warp-template.json` has a `devcontainer` key that the WarpEngine Toolbox reads
+(an older toolbox ignores it): a new project gets `.devcontainer/` from
+`example-devcontainer.json` and `example-devcontainer.Dockerfile` — the CI
+builder image the host names (`{builderImage}`) plus git and a `dev` user —
+so a computer with only Docker builds with the same toolchain as the pipeline.
+The tasks of `example-devcontainer-tasks.json` are merged into
+`.vscode/tasks.json`: `dev image` builds the container image, `play` builds the
+game and plays it in the host's web runtime. The Go module cache (`GOPATH`) of the image belongs to `dev` there. `make web` builds the WebAssembly version with its page into `dist/`, which the `play` task plays in the Play panel. The game window does not open in the container: `run (native)` runs `make run` on this computer, which needs Go here.
+For an existing game repo, *WarpEngine: Add Dev Container* adds it and merges
+the tasks, keeping yours.
 
 ## Usage in a game repo
 

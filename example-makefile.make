@@ -35,6 +35,9 @@ wasm:
 	GOOS=js GOARCH=wasm go build -o $(OUTPUT_WASM) .
 	cp "$$(go env GOROOT)/lib/wasm/wasm_exec.js" $(OUTPUT_JS)
 
+web: wasm
+	curl -sSL $(INDEX_HTML_URL) -o $(DIST_DIR)/index.html
+
 export: wasm
 	@if [ -z "$(VERSION)" ]; then \
 		echo "ERROR: VERSION not set!"; exit 1; \
@@ -155,4 +158,4 @@ watch:
 clean:
 	rm -rf $(BIN_DIR) $(DIST_DIR)
 
-.PHONY: all build run wasm export watch clean binaries binaries-mac mac-release binary-win-x86 binary-win-x64 binary-linux-x64 binary-mac-x64 binary-mac-arm64 binary-build binary-build-mac
+.PHONY: web all build run wasm export watch clean binaries binaries-mac mac-release binary-win-x86 binary-win-x64 binary-linux-x64 binary-mac-x64 binary-mac-arm64 binary-build binary-build-mac
