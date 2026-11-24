@@ -98,7 +98,7 @@ binary-mac-arm64:
 # run on a Mac: builds the mac zips, uploads them into the release the CI
 # published and publishes it again (warp-engine, the WarpEngine CLI)
 mac-release: binaries-mac
-	@command -v $(WARP_ENGINE) >/dev/null 2>&1 || { echo "ERROR: $(WARP_ENGINE) (the WarpEngine CLI) is not installed, see README.md"; exit 1; }
+	@command -v $(WARP_ENGINE) >/dev/null 2>&1 || { echo "ERROR: $(WARP_ENGINE) (the WarpEngine CLI) is not installed: curl -fsSL https://git.teletypegames.org/engines/warp-engine-cli/raw/branch/master/install.sh | sh"; exit 1; }
 	$(WARP_ENGINE) release upload --name $(PROJECT) --version $(VERSION) $(foreach target,$(MAC_TARGETS),$(PROJECT)-$(VERSION)-$(target).zip)
 	$(WARP_ENGINE) release publish --name $(PROJECT) --version $(VERSION) --platform ebitengine
 
