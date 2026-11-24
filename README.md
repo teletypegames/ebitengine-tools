@@ -70,7 +70,7 @@ They are built **on a mac host** instead, packaged as a minimal
 `.app` bundle (generated Info.plist, ad-hoc `codesign`):
 
 ```sh
-make mac-release VERSION=x.y.z UPDATE_SECRET=...
+WARP_TOKEN=... make mac-release VERSION=x.y.z   # an application token with update + upload
 ```
 
 This builds both mac zips, uploads them via `/build/upload` and re-triggers
