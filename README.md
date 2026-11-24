@@ -3,12 +3,12 @@
 CI/CD templates for [Ebitengine](https://ebitengine.org) (Go) game
 projects, in the same spirit as [tic80-tools](../tic80-tools).
 
-- `example-makefile.make` — project Makefile: local dev targets
-  (`build`, `run`, `wasm`, `export`, `watch`, `clean`), native binary targets
-  (`binaries`, `binary-win-x86`, `binary-win-x64`, `binary-linux-x64`)
-  and the mac-host release targets (`binaries-mac`, `mac-release`).
-- `example-woodpecker.yaml` — a one-line marker (`platform: ebitengine`): the
-  full pipeline (version → build → binaries → artifact → publish) is served by the update server's Woodpecker
+- `example-makefile.make` — project Makefile: the shared targets (`build`,
+  `run`, `check`, `web`, `clean`, `mac-release`, see below) plus `export`,
+  `watch`, the native binary targets (`binaries`, `binary-win-x86`,
+  `binary-win-x64`, `binary-linux-x64`) and `binaries-mac`.
+- `.woodpecker.yaml` (written by New Game, not kept here) — a one-line
+  marker (`platform: ebitengine`): the full pipeline (version → build → binaries → artifact → publish) is served by the update server's Woodpecker
   configuration extension — preview it with
   `curl "https://teletypegames.org/build/config?platform=ebitengine"`.
 - `example-tasks.json` — VS Code `.vscode/tasks.json`: `build` (the default
@@ -39,11 +39,18 @@ The container editor gets its extensions from `example-devcontainer.json`: the W
 For an existing game repo, *WarpEngine: Add Dev Container* adds it and merges
 the tasks, keeping yours.
 
+## Makefile contract
+
+The Makefile has the targets every WarpEngine template shares: `build`, `run`, `check` (the CI's check step runs it in the builder image),
+`clean`, `web` (the WebAssembly build with its page in `dist/`, which Play plays) and `mac-release` (the mac zips, built and released on a Mac). `warp-engine check makefile` of the
+[WarpEngine CLI](https://wiki.teletypegames.org/godoc/warp-engine-cli/latest/cmd/warp-engine/)
+checks a project against it. `check` is `go vet`.
+
 ## Usage in a game repo
 
 1. Copy `example-makefile.make` to `Makefile` and set `PROJECT`
    (the native binary is built to `bin/$(PROJECT)`).
-2. Copy `example-woodpecker.yaml` to `.woodpecker.yaml` (a one-line marker — the
+2. Create `.woodpecker.yaml` with the line `platform: ebitengine` (a one-line marker — the
    pipeline itself is served by the update server; add `name:` when the
    software name differs from the repo name) and add the
    `application_token` secret in Woodpecker (an ApplicationToken with
@@ -67,15 +74,27 @@ so the executable bit survives on the linux binary.
 Ebitengine requires cgo on darwin (GLFW/Metal — purego does not cover
 it), so the mac targets cannot be cross-compiled from the linux builder.
 They are built **on a mac host** instead, packaged as a minimal
-`.app` bundle (generated Info.plist, ad-hoc `codesign`):
+`.app` bundle (generated Info.plist, ad-hoc `codesign`).
+
+`mac-release` builds both mac zips (`mac-x64`, `mac-arm64`) on the Mac and releases them with the
+[WarpEngine CLI](https://wiki.teletypegames.org/godoc/warp-engine-cli/latest/cmd/warp-engine/):
+`warp-engine release upload` sends the zips into the release's folder and
+`warp-engine release publish --platform ebitengine` publishes the release again, which keeps
+the CI's files and adds these. Install the CLI once on the Mac (into `~/.local/bin`):
 
 ```sh
-WARP_TOKEN=... make mac-release VERSION=x.y.z   # an application token with update + upload
+curl -fsSL https://git.teletypegames.org/engines/warp-engine-cli/raw/branch/master/install.sh | sh
 ```
 
-This builds both mac zips, uploads them via `/build/upload` and re-triggers
-`/build/publish` — the updater attaches the new assets to the already existing
-release, so run it after the CI pipeline has created the release.
+or, with Go, `go install git.teletypegames.org/engines/warp-engine-cli/cmd/warp-engine@latest`.
+The token is an application token with the `update` + `upload` scopes; the server is
+`WARP_SERVER` (default `https://teletypegames.org`):
+
+```sh
+WARP_TOKEN=... make mac-release VERSION=x.y.z
+```
+
+Run it after the CI pipeline has created the release.
 Ad-hoc signature means Gatekeeper shows the "unidentified developer"
 warning (right-click → Open); proper signing/notarization needs an
 Apple Developer account.

@@ -16,10 +16,13 @@ OUTPUT_WASM = $(DIST_DIR)/$(WASM_NAME)
 OUTPUT_JS   = $(DIST_DIR)/wasm_exec.js
 OUTPUT_ZIP  = $(PROJECT)-$(VERSION).html.zip
 
-INDEX_HTML_URL = https://git.teletypegames.org/tools/ebitengine-tools/raw/branch/master/web/index.html
+INDEX_HTML_URL = https://git.teletypegames.org/build/ebitengine-tools/raw/branch/master/web/index.html
 
-# for running mac-release locally (CI publishes over the served pipeline)
-WARP_SERVER          ?= https://teletypegames.org
+# mac-release: the catalog and the WarpEngine CLI; WARP_TOKEN is an
+# application token with the update + upload scopes
+WARP_SERVER ?= https://teletypegames.org
+WARP_ENGINE ?= warp-engine
+export WARP_SERVER WARP_TOKEN
 
 all: build
 
@@ -30,20 +33,19 @@ build:
 run: build
 	./$(OUTPUT_BIN)
 
-wasm:
+check:
+	go vet ./...
+
+web:
 	@mkdir -p $(DIST_DIR)
 	GOOS=js GOARCH=wasm go build -o $(OUTPUT_WASM) .
 	cp "$$(go env GOROOT)/lib/wasm/wasm_exec.js" $(OUTPUT_JS)
-
-web: wasm
 	curl -sSL $(INDEX_HTML_URL) -o $(DIST_DIR)/index.html
 
-export: wasm
+export: web
 	@if [ -z "$(VERSION)" ]; then \
 		echo "ERROR: VERSION not set!"; exit 1; \
 	fi
-	@echo "==> Downloading index.html"
-	curl -sSL $(INDEX_HTML_URL) -o $(DIST_DIR)/index.html
 	@echo "==> Packaging HTML/WASM for $(VERSION)"
 	zip -r $(OUTPUT_ZIP) -j $(DIST_DIR)/$(WASM_NAME) $(DIST_DIR)/wasm_exec.js $(DIST_DIR)/index.html
 	@echo "==> Cleaning temporary files"
@@ -56,7 +58,7 @@ export: wasm
 BINARY_TARGETS = win-x86 win-x64 linux-x64
 # mac-x64 / mac-arm64: az Ebitengine darwinon cgo-t igényel (GLFW/Metal),
 # ezért ezek CSAK mac hoston építhetők: `make binaries-mac VERSION=x.y.z`,
-# feltöltés + release frissítés: `WARP_TOKEN=<application token: update + upload> make mac-release VERSION=x.y.z`
+# upload + publish: `WARP_TOKEN=<application token: update + upload> make mac-release VERSION=x.y.z`
 MAC_TARGETS = mac-x64 mac-arm64
 
 binaries:
@@ -93,17 +95,12 @@ binary-mac-x64:
 binary-mac-arm64:
 	@$(MAKE) binary-build-mac VERSION=$(VERSION) B_GOARCH=arm64 B_TARGET=mac-arm64
 
-# macről futtatandó: felépíti mindkét mac zipet, feltölti a /build/upload-dal,
-# majd a /build/publish hozzáfűzi az asseteket a meglévő release-hez
+# run on a Mac: builds the mac zips, uploads them into the release the CI
+# published and publishes it again (warp-engine, the WarpEngine CLI)
 mac-release: binaries-mac
-	@FILES=""; \
-	for target in $(MAC_TARGETS); do FILES="$$FILES $(PROJECT)-$(VERSION)-$$target.zip"; done; \
-	for f in $$FILES; do \
-		curl -fsS -H "X-Update-Secret: $(WARP_TOKEN)" \
-			-F "file=@$$f" \
-			"$(WARP_SERVER)/build/upload?name=$(PROJECT)&version=$(VERSION)" || exit 1; \
-	done; \
-	curl -fsS -X POST -H "X-Update-Secret: $(WARP_TOKEN)" "$(WARP_SERVER)/build/publish?name=$(PROJECT)&platform=ebitengine&version=$(VERSION)"
+	@command -v $(WARP_ENGINE) >/dev/null 2>&1 || { echo "ERROR: $(WARP_ENGINE) (the WarpEngine CLI) is not installed, see README.md"; exit 1; }
+	$(WARP_ENGINE) release upload --name $(PROJECT) --version $(VERSION) $(foreach target,$(MAC_TARGETS),$(PROJECT)-$(VERSION)-$(target).zip)
+	$(WARP_ENGINE) release publish --name $(PROJECT) --version $(VERSION) --platform ebitengine
 
 # belső helper: egy target buildje + zip egyetlen gyökérmappával
 # (a zipet unixos zip készíti, így a végrehajtási bit megmarad)
@@ -158,4 +155,4 @@ watch:
 clean:
 	rm -rf $(BIN_DIR) $(DIST_DIR)
 
-.PHONY: web all build run wasm export watch clean binaries binaries-mac mac-release binary-win-x86 binary-win-x64 binary-linux-x64 binary-mac-x64 binary-mac-arm64 binary-build binary-build-mac
+.PHONY: all build run check web export watch clean binaries binaries-mac mac-release binary-win-x86 binary-win-x64 binary-linux-x64 binary-mac-x64 binary-mac-arm64 binary-build binary-build-mac

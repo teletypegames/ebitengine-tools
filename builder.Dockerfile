@@ -1,6 +1,6 @@
 # CI builder image for Ebitengine projects: Go toolchain + packaging tools
 # + the X11/GL/ALSA dev libraries needed for the native linux-x64 (cgo) build.
-# Used by the `build` and `binaries` steps in example-woodpecker.yaml instead
+# Used by the `build` and `binaries` steps of the served pipeline instead
 # of installing everything on every pipeline run.
 #
 # Debian-based (not alpine): the linux-x64 game binary must link against
